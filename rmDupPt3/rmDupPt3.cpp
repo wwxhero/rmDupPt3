@@ -5,6 +5,8 @@
 #include "rmDupPt3.h"
 typedef double real;
 
+FI2Rthree<real>::String2Real FI2Rthree<real>::string2real = std::stod;
+
 using namespace std;
 int main(int argc, const char* argv[])
 {
@@ -20,13 +22,14 @@ int main(int argc, const char* argv[])
 		real epsilon = 0.0001;
 		bool ok = true;
 		if (4 == argc)
-			ok = ParseReal<real>(epsilon, argv[3]);
+			ok = ParseReal<real>(epsilon, argv[3]) 
+				&& epsilon > 0;
 		if (!ok)
 		{
 			cout << "epsilon spec is not in a valid format!!!";
 			return -1;
 		}
-
+		
 		FI2Rthree<real> i2r3;
 		ok = (ok && ParseReal3(i2r3, argv[1]));
 		if (!ok)
