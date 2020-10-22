@@ -2,8 +2,7 @@
 //
 
 #include <iostream>
-#include <tchar.h>
-
+#include "rmDupPt3.h"
 typedef double real;
 
 using namespace std;
@@ -18,8 +17,6 @@ int main(int argc, const char* argv[])
 	}
 	else
 	{
-		string pathSrc = argv[1];
-		string pathDst = argv[2];
 		real epsilon = 0.0001;
 		bool ok = true;
 		if (4 == argc)
@@ -31,15 +28,15 @@ int main(int argc, const char* argv[])
 		}
 
 		FI2Rthree<real> i2r3;
-		ok = (ok && ParseReal3(pathSrc, i2r3));
+		ok = (ok && ParseReal3(i2r3, argv[1]));
 		if (!ok)
 		{
-			cout << "source file is not in valid either because the file does exist or the file is not in valid format!!!";
+			cout << argv[1] <<" is not valid either because the file does exist or the file is not in valid format!!!";
 			return -1;
 		}
-		RmDupPt3(i2r3);
+		TagDupPt3(i2r3);
 
-		ok = (ok && Output(i2r3, pathDst));
+		ok = (ok && Output(i2r3, argv[2]));
 		if (!ok)
 		{
 			cout << "destination file path is not valid!!!";
