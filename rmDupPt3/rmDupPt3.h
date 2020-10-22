@@ -88,5 +88,23 @@ void TagDupPt3(FI2Rthree<Real>& i2r3)
 template<typename Real>
 bool Output(const FI2Rthree<Real>& i2r3, const char* path_spec)
 {
-	return false;
+	std::ofstream outfile(path_spec);
+	if (!outfile.fail())
+	{
+		for (auto it = i2r3.vecR3.begin()
+			; it != i2r3.vecR3.end()
+			; it ++)
+		{
+			if (!it->dup)
+				outfile << it->v[0]
+						<< ", "
+						<< it->v[1]
+						<< ", "
+						<< it->v[2]
+						<< std::endl;
+		}
+		return true;
+	}
+	else
+		return false;
 }
