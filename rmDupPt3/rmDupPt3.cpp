@@ -22,19 +22,19 @@ int main(int argc, const char* argv[])
 		real epsilon = 0.0001;
 		bool ok = true;
 		if (4 == argc)
-			ok = ParseReal<real>(epsilon, argv[3]) 
+			ok = ParseReal<real>(epsilon, argv[3])
 				&& epsilon > 0;
 		if (!ok)
 		{
 			cout << "epsilon spec is not in a valid format!!!";
 			return -1;
 		}
-		
+
 		FI2Rthree<real> i2r3;
 		ok = (ok && ParseReal3(i2r3, argv[1]));
 		if (!ok)
 		{
-			cout << argv[1] <<" is not valid either because the file does exist or the file is not in valid format!!!";
+			cout << argv[1] <<" is not valid either because the file does exist or the file is not in a valid format!!!";
 			return -1;
 		}
 		TagDupPt3(i2r3);
