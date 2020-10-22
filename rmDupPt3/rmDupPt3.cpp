@@ -4,15 +4,18 @@
 #include <iostream>
 #include <tchar.h>
 
+using namespace std;
 int main(int argc, const char* argv[])
 {
-	std::cout << argv[0];
-	for (int i_arg = 1
-		; i_arg < argc
-		; i_arg ++)
-		std::cout << " " << argv[i_arg];
-	std::cout << std::endl;
-	return 0;
+	if (argc < 3
+		|| argc > 4)
+	{
+		cout << "Run command as:" << endl;
+		cout << "\trmDupPt3 <source file> <destination file> [<epsilon specification>]" << endl;
+		return -1;
+	}
+	else
+		return 0;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
