@@ -4,6 +4,8 @@
 #include <iostream>
 #include <tchar.h>
 
+typedef double real;
+
 using namespace std;
 int main(int argc, const char* argv[])
 {
@@ -15,7 +17,37 @@ int main(int argc, const char* argv[])
 		return -1;
 	}
 	else
+	{
+		string pathSrc = argv[1];
+		string pathDst = argv[2];
+		real epsilon = 0.0001;
+		bool ok = true;
+		if (4 == argc)
+			ok = ParseReal<real>(epsilon, argv[3]);
+		if (!ok)
+		{
+			cout << "epsilon spec is not in a valid format!!!";
+			return -1;
+		}
+
+		FI2Rthree<real> i2r3;
+		ok = (ok && ParseReal3(pathSrc, i2r3));
+		if (!ok)
+		{
+			cout << "source file is not in valid either because the file does exist or the file is not in valid format!!!";
+			return -1;
+		}
+		RmDupPt3(i2r3);
+
+		ok = (ok && Output(i2r3, pathDst));
+		if (!ok)
+		{
+			cout << "destination file path is not valid!!!";
+			return -1;
+		}
+		cout << "duplications are removed SUCCESSFULLY in the destination file!!!";
 		return 0;
+	}
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
