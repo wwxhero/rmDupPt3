@@ -5,6 +5,8 @@
 #include <vector>
 #include <map>
 #include <list>
+#include <algorithm>
+#include <time.h>
 #include <assert.h>
 
 template<typename Real>
@@ -52,6 +54,9 @@ typedef std::size_t Idx;
 
 template<typename Real>
 using FR2I = std::multimap<Real, Idx>;
+
+typedef Idx DEG_n;
+typedef std::map<Idx, DEG_n> FI2N;
 
 struct Edge : public std::pair<Idx, Idx>
 {
@@ -133,6 +138,7 @@ bool ParseReal3(FI2R3<Real>& i2r3, const char* path_spec)
 template<typename Real>
 void TagDupPt3(FI2R3<Real>& f_i2r3, Real epsilon)
 {
+	srand(time(NULL)); //radomly pick among {x, y, z} for screening.
 	Real epsilon_sqr = epsilon * epsilon;
 	int i_f = rand() % 3;
 	FR2I<Real> f_r2i;
@@ -181,6 +187,46 @@ void TagDupPt3(FI2R3<Real>& f_i2r3, Real epsilon)
 		printf("\t(%5d, %5d)\n", it_e->first+1, it_e->second+1);
 	}
 #endif
+
+	FI2N vert_deg;
+	for (auto it_e = edges.begin()
+		; it_e != edges.end()
+		; it_e ++)
+	{
+		++ vert_deg[it_e->first];
+		++ vert_deg[it_e->second];
+	}
+
+	std::multimap<DEG_n, Edge> deg_e;
+	for (auto it_e = edges.begin()
+		; it_e != edges.end()
+		; it_e ++)
+	{
+		DEG_n deg = std::max(vert_deg[it_e->first], vert_deg[it_e->second]);
+		deg_e.insert(std::pair<DEG_n, Edge>(deg, *it_e));
+	}
+
+	for (auto it_deg_e = deg_e.end()
+		; it_deg_e != deg_e.begin()
+		; )
+	{
+		it_deg_e --;
+		const Edge& e = it_deg_e->second;
+		Idx i = e.first;
+		Idx j = e.second;
+		R3<Real>& p_i = f_i2r3.vecR3[i];
+		R3<Real>& p_j = f_i2r3.vecR3[j];
+		bool not_tagged = (!p_i.dup
+						&& !p_j.dup);
+		if (not_tagged)
+		{
+			if (it_deg_e->first == vert_deg[i])
+				p_i.dup = true;
+			else
+				p_j.dup = true;
+		}
+	}
+
 }
 
 template<typename Real>
