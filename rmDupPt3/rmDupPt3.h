@@ -3,6 +3,9 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <map>
+#include <list>
+#include <assert.h>
 
 template<typename Real>
 struct R3
@@ -10,19 +13,66 @@ struct R3
 	R3() : dup(false)
 		 , v{0, 0, 0}
 	{
-
 	}
+	R3(Real v0, Real v1, Real v2)
+		: dup(false)
+		, v{v0, v1, v2}
+	{
+	}
+
+	Real norm_sqr()
+	{
+		return v[0] * v[0]
+			 + v[1] * v[1]
+			 + v[2] * v[2];
+	}
+
 	Real v[3];
 	bool dup;
 };
 
+template<typename Real> R3<Real> operator-(const R3<Real>& first
+										, const R3<Real>& second)
+{
+	R3<Real> ret(first.v[0] - second.v[0]
+			, first.v[1] - second.v[1]
+			, first.v[2] - second.v[2]);
+	return ret;
+}
+
 template<typename Real>
-struct FI2Rthree
+struct FI2R3
 {
 	std::vector<R3<Real>> vecR3;
 	typedef Real (*String2Real)(const std::string& str, std::size_t* pos);
 	static String2Real string2real;
 };
+
+typedef std::size_t Idx;
+
+template<typename Real>
+using FR2I = std::multimap<Real, Idx>;
+
+struct Edge : public std::pair<Idx, Idx>
+{
+	Edge(Idx i, Idx j)
+	{
+		assert(i != j);
+		if (i < j)
+		{
+			first = i;
+			second = j;
+		}
+		else
+		{
+			first = j;
+			second = i;
+		}
+	}
+};
+
+typedef std::list<Edge> Edges;
+
 
 template<typename Real>
 bool ParseReal(Real& r, const char* r_spec, int len_spec = -1)
@@ -32,12 +82,12 @@ bool ParseReal(Real& r, const char* r_spec, int len_spec = -1)
 		if (-1 == len_spec)
 		{
 			std::string r_spec2(r_spec);
-			r = FI2Rthree<Real>::string2real(r_spec2, nullptr);
+			r = FI2R3<Real>::string2real(r_spec2, nullptr);
 		}
 		else
 		{
 			std::string r_spec2(r_spec, len_spec);
-			r = FI2Rthree<Real>::string2real(r_spec2, nullptr);
+			r = FI2R3<Real>::string2real(r_spec2, nullptr);
 		}
 		return true;
 	}
@@ -48,7 +98,7 @@ bool ParseReal(Real& r, const char* r_spec, int len_spec = -1)
 }
 
 template<typename Real>
-bool ParseReal3(FI2Rthree<Real>& i2r3, const char* path_spec)
+bool ParseReal3(FI2R3<Real>& i2r3, const char* path_spec)
 {
 	//this is not a robust parser
 	//, but is confined only with the specified format in BNF
@@ -81,12 +131,60 @@ bool ParseReal3(FI2Rthree<Real>& i2r3, const char* path_spec)
 }
 
 template<typename Real>
-void TagDupPt3(FI2Rthree<Real>& i2r3)
+void TagDupPt3(FI2R3<Real>& f_i2r3, Real epsilon)
 {
+	Real epsilon_sqr = epsilon * epsilon;
+	int i_f = rand() % 3;
+	FR2I<Real> f_r2i;
+	for (Idx i_n = 0; i_n < f_i2r3.vecR3.size(); i_n ++)
+	{
+		std::pair<Real, Idx> r2i(f_i2r3.vecR3[i_n].v[i_f], i_n);
+		f_r2i.insert(r2i);
+	}
+	Edges edges;
+	auto it_j_end = f_r2i.end();
+	auto it_i_end = it_j_end; it_i_end --;
+	for (auto it_i = f_r2i.begin()
+		; it_i != it_i_end
+		; it_i ++)
+	{
+		auto r_i = it_i->first;
+		auto i = it_i->second;
+		auto r3_i = f_i2r3.vecR3[i];
+		auto it_j = it_i; it_j ++;
+		bool in_region = true;
+		for (
+			; it_j != it_j_end && in_region
+			; it_j ++)
+		{
+			auto r_j = it_j->first;
+			in_region = ((r_j - r_i) < epsilon);
+			if (in_region)
+			{
+				auto j = it_j->second;
+				auto r3_j = f_i2r3.vecR3[j];
+				if ((r3_j - r3_i).norm_sqr() < epsilon_sqr)
+				{
+					Edge e(i, j);
+					edges.push_back(e);
+				}
+			}
+		}
+	}
+
+#ifdef _DEBUG
+	std::cout << "Edges are within epsilon range:" <<std::endl;
+	for (auto it_e = edges.begin()
+		; it_e != edges.end()
+		; it_e ++)
+	{
+		printf("\t(%5d, %5d)\n", it_e->first+1, it_e->second+1);
+	}
+#endif
 }
 
 template<typename Real>
-bool Output(const FI2Rthree<Real>& i2r3, const char* path_spec)
+bool Output(const FI2R3<Real>& i2r3, const char* path_spec)
 {
 	std::ofstream outfile(path_spec);
 	if (!outfile.fail())

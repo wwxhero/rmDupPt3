@@ -5,7 +5,7 @@
 #include "rmDupPt3.h"
 typedef double real;
 
-FI2Rthree<real>::String2Real FI2Rthree<real>::string2real = std::stod;
+FI2R3<real>::String2Real FI2R3<real>::string2real = std::stod;
 
 using namespace std;
 int main(int argc, const char* argv[])
@@ -30,14 +30,14 @@ int main(int argc, const char* argv[])
 			return -1;
 		}
 
-		FI2Rthree<real> i2r3;
+		FI2R3<real> i2r3;
 		ok = (ok && ParseReal3(i2r3, argv[1]));
 		if (!ok)
 		{
 			cout << argv[1] <<" is not valid either because the file does exist or the file is not in a valid format!!!";
 			return -1;
 		}
-		TagDupPt3(i2r3);
+		TagDupPt3(i2r3, epsilon);
 
 		ok = (ok && Output(i2r3, argv[2]));
 		if (!ok)
